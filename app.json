@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "ScholarGen",
+    "slug": "scholar-gen",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.timothyomhensele.scholargen"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font"
+    ],
+    "experiments": {
+      "baseUrl": "./"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a75a8403-8fb4-488e-9bf9-5a5f3fcc59f1"
+      }
+    }
+  }
+}
