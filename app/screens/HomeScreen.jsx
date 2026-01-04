@@ -1,4 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+"use client"
+
+import { useState, useRef, useEffect } from "react"
 import {
   View,
   Text,
@@ -12,105 +14,88 @@ import {
   Alert,
   Platform,
   StatusBar,
-  TextInput,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../context/ThemeContext';
-import { useDatabase } from '../context/DatabaseContext';
+} from "react-native"
+import { Ionicons } from "@expo/vector-icons"
+import { useTheme } from "../context/ThemeContext"
+import { useDatabase } from "../context/DatabaseContext"
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get("window")
 
 const HomeScreen = ({ navigation }) => {
-  const { theme, isDarkMode } = useTheme();
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const flatListRef = useRef(null);
+  const { theme, isDarkMode } = useTheme()
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const flatListRef = useRef(null)
 
-  // Hero slider images - utilizing user provided images
   const sliderImages = [
     {
       id: 1,
-      title: 'Master UTME 2026',
-      subtitle: 'Your path to success starts here',
-      image: require('../../assets/hero/hero1.jpg'),
+      title: "Master UTME 2026",
+      subtitle: "Your path to success starts here",
+      image: require("../assets/hero/hero1.jpg"),
     },
     {
       id: 2,
-      title: 'Study Smart',
-      subtitle: 'Access comprehensive study materials',
-      image: require('../../assets/hero/hero2.jpg'),
+      title: "Study Smart",
+      subtitle: "Access comprehensive study materials",
+      image: require("../assets/hero/hero2.jpg"),
     },
     {
       id: 3,
-      title: 'Practice Tests',
-      subtitle: 'Take unlimited practice exams',
-      image: require('../../assets/hero/hero3.jpg'),
+      title: "Practice Tests",
+      subtitle: "Take unlimited practice exams",
+      image: require("../assets/hero/hero3.jpg"),
     },
-  ];
+  ]
 
-  // Quick action items
   const quickActions = [
-    { id: 1, title: 'UTME Practice', icon: 'document-text-outline', color: '#FFC107' },
-    { id: 3, title: 'Educational Games', icon: 'game-controller-outline', color: '#FF9800' },
-    { id: 4, title: 'Flashcards', icon: 'albums-outline', color: '#9C27B0' },
-    { id: 5, title: 'Calculator', icon: 'calculator-outline', color: '#F44336' },
-    { id: 6, title: 'Activate App', icon: 'key-outline', color: '#607D8B' },
-  ];
+    { id: 1, title: "UTME Practice", icon: "document-text-outline", color: "#FFC107" },
+    { id: 3, title: "Educational Games", icon: "game-controller-outline", color: "#FF9800" },
+    { id: 4, title: "Flashcards", icon: "albums-outline", color: "#9C27B0" },
+    { id: 5, title: "Calculator", icon: "calculator-outline", color: "#F44336" },
+    { id: 6, title: "Activate App", icon: "key-outline", color: "#607D8B" },
+  ]
 
-  // Flashcard data
-
-
-  // Flashcard states
-
-
-  // Recent activities from Database
-  const { activities } = useDatabase();
-  const recentActivities = [...activities].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const { activities } = useDatabase()
+  const recentActivities = [...activities].sort((a, b) => new Date(b.date) - new Date(a.date))
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prevSlide) => {
-        const nextSlide = (prevSlide + 1) % sliderImages.length;
-        flatListRef.current?.scrollToIndex({ index: nextSlide, animated: true });
-        return nextSlide;
-      });
-    }, 4000);
+        const nextSlide = (prevSlide + 1) % sliderImages.length
+        flatListRef.current?.scrollToIndex({ index: nextSlide, animated: true })
+        return nextSlide
+      })
+    }, 4000)
 
-    return () => clearInterval(timer);
-  }, []);
+    return () => clearInterval(timer)
+  }, [sliderImages.length])
 
   const handleSlideChange = (event) => {
-    const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
-    setCurrentSlide(slideIndex);
-  };
+    const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width)
+    setCurrentSlide(slideIndex)
+  }
 
   const handleQuickAction = (action) => {
-    if (action.title === 'Calculator') {
-      navigation.navigate('Calculator');
-    } else if (action.title === 'UTME Practice') {
-      navigation.navigate('ExamCategory');
-    } else if (action.title === 'Educational Games') {
-      navigation.navigate('Games');
-    } else if (action.title === 'Flashcards') {
-      navigation.navigate('FlashCard');
-    } else if (action.title === 'Activate App') {
-      navigation.navigate('Activation');
-      return;
+    if (action.title === "Calculator") {
+      navigation.navigate("Calculator")
+    } else if (action.title === "UTME Practice") {
+      navigation.navigate("ExamCategory")
+    } else if (action.title === "Educational Games") {
+      navigation.navigate("Games")
+    } else if (action.title === "Flashcards") {
+      navigation.navigate("FlashCard")
+    } else if (action.title === "Activate App") {
+      navigation.navigate("Activation")
     } else {
-      Alert.alert(action.title, `${action.title} feature will be available soon!`);
+      Alert.alert(action.title, `${action.title} feature will be available soon!`)
     }
-  };
-
-  // Flashcard functions
-
-
-
+  }
 
   const renderSliderItem = ({ item }) => (
     <View style={styles.slideItem}>
       <Image source={item.image} style={styles.slideImage} resizeMode="cover" />
-
     </View>
-  );
+  )
 
   const renderQuickAction = (action) => (
     <TouchableOpacity
@@ -119,15 +104,19 @@ const HomeScreen = ({ navigation }) => {
       onPress={() => handleQuickAction(action)}
       activeOpacity={0.7}
     >
-      <View style={[styles.quickActionIcon, { backgroundColor: action.color + '15' }]}>
+      <View style={[styles.quickActionIcon, { backgroundColor: action.color + "15" }]}>
         <Ionicons name={action.icon} size={24} color={action.color} />
       </View>
       <Text style={[styles.quickActionText, { color: theme.text }]}>{action.title}</Text>
     </TouchableOpacity>
-  );
+  )
 
   const renderRecentActivity = (activity) => (
-    <TouchableOpacity key={activity.id} style={[styles.activityItem, { borderBottomColor: theme.border }]} activeOpacity={0.7}>
+    <TouchableOpacity
+      key={activity.id}
+      style={[styles.activityItem, { borderBottomColor: theme.border }]}
+      activeOpacity={0.7}
+    >
       <View style={[styles.activityIcon, { backgroundColor: activity.color }]}>
         <Ionicons name="book-outline" size={20} color="#fff" />
       </View>
@@ -139,18 +128,13 @@ const HomeScreen = ({ navigation }) => {
         <Text style={[styles.scoreText, { color: activity.color }]}>{activity.score}</Text>
       </View>
     </TouchableOpacity>
-  );
+  )
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Header */}
       <View style={[styles.header, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
         <View style={styles.headerLeft}>
-          <Image
-            source={require('../../assets/splash-logo.png')}
-            style={styles.headerLogo}
-            resizeMode="contain"
-          />
+          <Image source={require("../assets/splash-logo.png")} style={styles.headerLogo} resizeMode="contain" />
           <View>
             <Text style={[styles.headerTitle, { color: theme.text }]}>ScholarGen</Text>
             <Text style={[styles.headerSubtitle, { color: theme.textSecondary }]}>UTME Preparation</Text>
@@ -163,7 +147,6 @@ const HomeScreen = ({ navigation }) => {
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Image Slider */}
         <View style={styles.sliderContainer}>
           <FlatList
             ref={flatListRef}
@@ -175,32 +158,24 @@ const HomeScreen = ({ navigation }) => {
             onMomentumScrollEnd={handleSlideChange}
             keyExtractor={(item) => item.id.toString()}
           />
-
-          {/* Slider Indicators */}
           <View style={styles.indicatorContainer}>
             {sliderImages.map((_, index) => (
               <View
                 key={index}
                 style={[
                   styles.indicator,
-                  { backgroundColor: currentSlide === index ? '#fff' : 'rgba(255,255,255,0.5)' }
+                  { backgroundColor: currentSlide === index ? "#fff" : "rgba(255,255,255,0.5)" },
                 ]}
               />
             ))}
           </View>
         </View>
 
-        {/* Quick Actions */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Quick Actions</Text>
-          <View style={styles.quickActionsGrid}>
-            {quickActions.map(renderQuickAction)}
-          </View>
+          <View style={styles.quickActionsGrid}>{quickActions.map(renderQuickAction)}</View>
         </View>
 
-
-
-        {/* Stats Overview */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Your Progress</Text>
           <View style={styles.statsContainer}>
@@ -219,7 +194,6 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* Recent Activities */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: theme.text }]}>Recent Activities</Text>
@@ -232,10 +206,9 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* Study Reminder */}
         <View style={styles.section}>
           <View style={[styles.reminderCard, { backgroundColor: theme.card, shadowColor: theme.text }]}>
-            <View style={[styles.reminderIcon, { backgroundColor: isDarkMode ? '#333' : '#f0f8ff' }]}>
+            <View style={[styles.reminderIcon, { backgroundColor: isDarkMode ? "#333" : "#f0f8ff" }]}>
               <Ionicons name="time-outline" size={24} color="#FFC107" />
             </View>
             <View style={styles.reminderContent}>
@@ -248,28 +221,25 @@ const HomeScreen = ({ navigation }) => {
         </View>
       </ScrollView>
     </SafeAreaView>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 16,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 10 : 16,
-    backgroundColor: '#fff',
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 10 : 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
   },
   headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   headerLogo: {
     width: 40,
@@ -278,85 +248,46 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
+    fontWeight: "bold",
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#666',
   },
   notificationButton: {
-    position: 'relative',
+    position: "relative",
     padding: 8,
   },
   notificationBadge: {
-    position: 'absolute',
+    position: "absolute",
     top: 8,
     right: 8,
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#FF3B30',
+    backgroundColor: "#FF3B30",
   },
   scrollView: {
     flex: 1,
   },
   sliderContainer: {
     height: 300,
-    position: 'relative',
+    position: "relative",
   },
   slideItem: {
     width: width,
     height: 300,
-    position: 'relative',
   },
   slideImage: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-  },
-  slideOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  slideContent: {
-    alignItems: 'center',
-    paddingHorizontal: 40,
-  },
-  slideTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'center',
-    marginBottom: 8,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: -1, height: 1 },
-    textShadowRadius: 10
-  },
-  slideSubtitle: {
-    fontSize: 16,
-    color: '#fff',
-    textAlign: 'center',
-    opacity: 0.9,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: -1, height: 1 },
-    textShadowRadius: 10
+    width: "100%",
+    height: "100%",
   },
   indicatorContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 30,
     left: 0,
     right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
   },
   indicator: {
     width: 8,
@@ -369,40 +300,34 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
+    fontWeight: "bold",
     marginBottom: 16,
   },
   seeAllText: {
     fontSize: 14,
-    color: '#FFC107',
-    fontWeight: '600',
+    color: "#FFC107",
+    fontWeight: "600",
   },
   quickActionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     paddingHorizontal: 10,
   },
   quickActionItem: {
-    width: (width - 70) / 2, // 2 columns with spacing
-    backgroundColor: '#fff',
+    width: (width - 70) / 2,
     borderRadius: 16,
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
@@ -411,73 +336,60 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 12,
   },
   quickActionText: {
     fontSize: 14,
-    color: '#333',
-    textAlign: 'center',
-    fontWeight: '600',
+    textAlign: "center",
+    fontWeight: "600",
   },
   statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
     marginHorizontal: 4,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   statNumber: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFC107',
+    fontWeight: "bold",
+    color: "#FFC107",
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
+    textAlign: "center",
   },
   activitiesContainer: {
-    backgroundColor: '#fff',
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   activityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   activityIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 12,
   },
   activityContent: {
@@ -485,32 +397,25 @@ const styles = StyleSheet.create({
   },
   activityTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
+    fontWeight: "600",
     marginBottom: 4,
   },
   activitySubtitle: {
     fontSize: 14,
-    color: '#666',
   },
   activityScore: {
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
   },
   scoreText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   reminderCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    flexDirection: "row",
+    alignItems: "center",
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
@@ -519,9 +424,8 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#f0f8ff',
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 16,
   },
   reminderContent: {
@@ -529,111 +433,13 @@ const styles = StyleSheet.create({
   },
   reminderTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
+    fontWeight: "600",
     marginBottom: 4,
   },
   reminderText: {
     fontSize: 14,
-    color: '#666',
     lineHeight: 20,
   },
-  // Flashcard styles
-  flashcardContainer: {
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  flashcard: {
-    width: width * 0.85,
-    height: 300,
-    position: 'relative',
-    transform: [{ perspective: 1000 }],
-  },
-  flashcardFlipped: {
-    transform: [{ rotateY: '180deg' }],
-  },
-  flashcardFace: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    backfaceVisibility: 'hidden',
-    borderRadius: 15,
-    padding: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  flashcardFront: {
-    backgroundColor: '#007AFF',
-    transform: [{ rotateY: '0deg' }],
-  },
-  flashcardBack: {
-    backgroundColor: '#E3F2FD',
-    transform: [{ rotateY: '180deg' }],
-  },
-  cardNumber: {
-    position: 'absolute',
-    top: 15,
-    right: 15,
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  questionText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#fff',
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  answerText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#007AFF',
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  tapHint: {
-    position: 'absolute',
-    bottom: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  tapHintText: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 14,
-    marginLeft: 5,
-  },
-  flipButton: {
-    position: 'absolute',
-    bottom: 15,
-    right: 15,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0, 122, 255, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  progressContainer: {
-    height: 4,
-    backgroundColor: 'rgba(0, 122, 255, 0.2)',
-    borderRadius: 2,
-    marginBottom: 20,
-    overflow: 'hidden',
-  },
-  progressBar: {
-    height: '100%',
-    backgroundColor: '#007AFF',
-    borderRadius: 2,
-  },
-});
+})
 
-export default HomeScreen;
+export default HomeScreen
