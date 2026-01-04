@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect } from "react"
 import { View, Text, StyleSheet, Dimensions, StatusBar, Image } from "react-native"
 import AsyncStorage from "@react-native-async-storage/async-storage"
@@ -16,7 +14,8 @@ const SplashScreen = ({ navigation }) => {
         // Check for session
         const token = await AsyncStorage.getItem("userToken")
         if (token) {
-          // Optional: Validate token with an API call here if needed in future
+          // If you are using Expo Router (which you are), use router.replace instead of navigation.replace
+          // But for now, let's keep your logic if you are passing navigation prop manually
           navigation.replace("MainTabs")
         } else {
           navigation.replace("Welcome")
@@ -35,8 +34,9 @@ const SplashScreen = ({ navigation }) => {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <View style={styles.content}>
         <View style={styles.logoContainer}>
+          {/* FIX: Changed from "../" to "../../" to reach the root folder */}
           <Image
-            source={require("../assets/scholarx-logo-removebg-preview.png")}
+            source={require("../../assets/scholarx-logo-removebg-preview.png")}
             style={styles.logo}
             resizeMode="contain"
           />
