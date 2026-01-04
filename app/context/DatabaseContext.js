@@ -46,11 +46,11 @@ export const DatabaseProvider = ({ children }) => {
 
         // Videos
         const initialVideos = [
-            { id: 'math1', videoId: 'UrECQM2zHPQ', title: 'Mathematics Video 1', subject: 'mathematics', thumbnail: 'https://img.youtube.com/vi/UrECQM2zHPQ/hqdefault.jpg' },
-            { id: 'math2', videoId: 'Ju1Nh2fb1as', title: 'Mathematics Video 2', subject: 'mathematics', thumbnail: 'https://img.youtube.com/vi/Ju1Nh2fb1as/hqdefault.jpg' },
-            { id: 'chem1', videoId: 'O5DqBh9vCy4', title: 'Chemistry Video 1', subject: 'chemistry', thumbnail: 'https://img.youtube.com/vi/O5DqBh9vCy4/hqdefault.jpg' },
-            { id: 'phy1', videoId: 'O5DqBh9vCy4', title: 'Physics Video 1', subject: 'physics', thumbnail: 'https://img.youtube.com/vi/O5DqBh9vCy4/hqdefault.jpg' },
-            { id: 'eng1', videoId: 'P_-D6DZeHZU', title: 'English Video 1', subject: 'english', thumbnail: 'https://img.youtube.com/vi/P_-D6DZeHZU/hqdefault.jpg' },
+            { id: 'math1', videoId: 'UrECQM2zHPQ', title: 'Mathematics Video 1', subject: 'mathematics' },
+            { id: 'math2', videoId: 'Ju1Nh2fb1as', title: 'Mathematics Video 2', subject: 'mathematics' },
+            { id: 'chem1', videoId: 'O5DqBh9vCy4', title: 'Chemistry Video 1', subject: 'chemistry' },
+            { id: 'phy1', videoId: 'O5DqBh9vCy4', title: 'Physics Video 1', subject: 'physics' },
+            { id: 'eng1', videoId: 'P_-D6DZeHZU', title: 'English Video 1', subject: 'english' },
         ];
 
         // Activities
