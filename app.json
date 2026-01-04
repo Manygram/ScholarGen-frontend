@@ -2,6 +2,7 @@
   "expo": {
     "name": "ScholarGen",
     "slug": "scholar-gen",
+    "owner": "manygram",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,6 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.timothyomhensele.scholargen",
       "runtimeVersion": {
         "policy": "appVersion"
       }
@@ -25,13 +27,20 @@
       "edgeToEdgeEnabled": true,
       "package": "com.timothyomhensele.scholargen",
       "runtimeVersion": "1.0.0",
-      "permissions": ["INTERNET"]
+      "permissions": [
+        "INTERNET"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-font"],
-    "assetBundlePatterns": ["assets/**/*"],
+    "plugins": [
+      "expo-font",
+      "expo-router"
+    ],
+    "assetBundlePatterns": [
+      "assets/**/*"
+    ],
     "extra": {
       "eas": {
         "projectId": "a75a8403-8fb4-488e-9bf9-5a5f3fcc59f1"
