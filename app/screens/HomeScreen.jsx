@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useRef, useEffect } from "react"
 import {
   View,
@@ -26,24 +24,25 @@ const HomeScreen = ({ navigation }) => {
   const [currentSlide, setCurrentSlide] = useState(0)
   const flatListRef = useRef(null)
 
+  // FIX: Added extra "../" to reach the root assets folder
   const sliderImages = [
     {
       id: 1,
       title: "Master UTME 2026",
       subtitle: "Your path to success starts here",
-      image: require("../assets/hero/hero1.jpg"),
+      image: require("../../assets/hero/hero1.jpg"), 
     },
     {
       id: 2,
       title: "Study Smart",
       subtitle: "Access comprehensive study materials",
-      image: require("../assets/hero/hero2.jpg"),
+      image: require("../../assets/hero/hero2.jpg"),
     },
     {
       id: 3,
       title: "Practice Tests",
       subtitle: "Take unlimited practice exams",
-      image: require("../assets/hero/hero3.jpg"),
+      image: require("../../assets/hero/hero3.jpg"),
     },
   ]
 
@@ -134,7 +133,8 @@ const HomeScreen = ({ navigation }) => {
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={[styles.header, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
         <View style={styles.headerLeft}>
-          <Image source={require("../assets/splash-logo.png")} style={styles.headerLogo} resizeMode="contain" />
+          {/* FIX: Added extra "../" here too */}
+          <Image source={require("../../assets/splash-logo.png")} style={styles.headerLogo} resizeMode="contain" />
           <View>
             <Text style={[styles.headerTitle, { color: theme.text }]}>ScholarGen</Text>
             <Text style={[styles.headerSubtitle, { color: theme.textSecondary }]}>UTME Preparation</Text>
