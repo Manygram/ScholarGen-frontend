@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import {
   View,
@@ -17,6 +15,7 @@ import {
 import { MaterialIcons as Icon } from "@expo/vector-icons"
 import { useTheme } from "../context/ThemeContext"
 import { authService } from "../services/authService"
+// Ensure this file actually exists at this path, or the build will fail!
 import LoadingOverlay from "../components/LoadingOverlay"
 
 const API_BASE = "https://api.scholargens.com/api"
@@ -122,7 +121,7 @@ export default function WelcomeScreen({ navigation }) {
         await authService.saveSession(sessionData)
 
         Alert.alert("Success", "Login successful!")
-        navigation.navigate("MainTabs")
+        navigation.replace("MainTabs") // Use replace so they can't go back to login
       }
     } catch (error) {
       console.error("Login error:", error)
@@ -297,6 +296,7 @@ export default function WelcomeScreen({ navigation }) {
           </View>
         </View>
       </ScrollView>
+      {/* If this file doesn't exist, the build will fail here */}
       <LoadingOverlay visible={isLoading} />
     </KeyboardAvoidingView>
   )
