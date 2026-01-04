@@ -25,7 +25,9 @@
     "lucide-react-native": "^0.322.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
-    "tailwind-merge": "3.4.0"
+    "tailwind-merge": "3.4.0",
+    "react-native-webview": "13.12.5",
+    "expo-font": "~13.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
