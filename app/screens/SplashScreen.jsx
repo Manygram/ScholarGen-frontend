@@ -14,15 +14,16 @@ const SplashScreen = ({ navigation }) => {
         // Check for session
         const token = await AsyncStorage.getItem("userToken")
         if (token) {
-          // If you are using Expo Router (which you are), use router.replace instead of navigation.replace
-          // But for now, let's keep your logic if you are passing navigation prop manually
+          // If user is already logged in, go to MainTabs
           navigation.replace("MainTabs")
         } else {
-          navigation.replace("Welcome")
+          // If not logged in, go to Login
+          navigation.replace("Login") 
         }
       } catch (e) {
         console.error("Session check failed", e)
-        navigation.replace("Welcome")
+        // On error, default to Login
+        navigation.replace("Login")
       }
     }
 
@@ -34,9 +35,9 @@ const SplashScreen = ({ navigation }) => {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <View style={styles.content}>
         <View style={styles.logoContainer}>
-          {/* FIX: Changed from "../" to "../../" to reach the root folder */}
+          {/* UPDATED: Using the correct filename provided */}
           <Image
-            source={require("../../assets/scholarx-logo-removebg-preview.png")}
+            source={require("../../assets/splash-logo.png")}
             style={styles.logo}
             resizeMode="contain"
           />
@@ -79,7 +80,7 @@ const styles = StyleSheet.create({
     color: "#000000", // Black text
     fontWeight: "bold",
     letterSpacing: 1,
-    marginBottom: 16, // Considerable space
+    marginBottom: 16, 
   },
   taglineText: {
     fontSize: 16,
