@@ -12,7 +12,10 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -20,7 +23,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.timothyomhensele.scholargen"
+      "package": "com.timothyomhensele.scholargen",
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -35,6 +39,9 @@
       "eas": {
         "projectId": "a75a8403-8fb4-488e-9bf9-5a5f3fcc59f1"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/a75a8403-8fb4-488e-9bf9-5a5f3fcc59f1"
     }
   }
 }
