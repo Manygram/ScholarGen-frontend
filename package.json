@@ -35,8 +35,7 @@
     "@react-native-community/cli": "^20.0.2"
   },
   "private": true
-}
-=======
+},
 {
   "name": "scholar-gen",
   "version": "1.0.0",
@@ -75,4 +74,5 @@
   },
   "private": true
 }
+
 
