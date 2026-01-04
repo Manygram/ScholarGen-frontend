@@ -3,20 +3,28 @@
     "name": "ScholarGen",
     "slug": "scholar-gen",
     "version": "1.0.0",
+
+    "assetBundlePatterns": [
+      "assets/**/*"
+    ],
+
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+
     "ios": {
       "supportsTablet": true,
       "runtimeVersion": {
         "policy": "appVersion"
       }
     },
+
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -24,24 +32,29 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.timothyomhensele.scholargen",
-      "runtimeVersion": "1.0.0"
+      "runtimeVersion": "1.0.0",
+      "permissions": ["INTERNET"]
     },
+
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-font"
-    ],
+
+    "plugins": ["expo-font"],
+
     "experiments": {
       "baseUrl": "./"
     },
+
+    "updates": {
+      "url": "https://u.expo.dev/a75a8403-8fb4-488e-9bf9-5a5f3fcc59f1"
+    },
+
     "extra": {
+      "API_BASE_URL": "https://app.scholargens.com",
       "eas": {
         "projectId": "a75a8403-8fb4-488e-9bf9-5a5f3fcc59f1"
       }
-    },
-    "updates": {
-      "url": "https://u.expo.dev/a75a8403-8fb4-488e-9bf9-5a5f3fcc59f1"
     }
   }
 }
