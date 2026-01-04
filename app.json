@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "ScholarGen",
-    "slug": "scholar-gen",
+    "slug": "scholargen",
     "owner": "manygramm",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -48,4 +48,3 @@
     }
   }
 }
-
