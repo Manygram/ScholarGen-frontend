@@ -14,16 +14,14 @@ const SplashScreen = ({ navigation }) => {
         // Check for session
         const token = await AsyncStorage.getItem("userToken")
         if (token) {
-          // If user is already logged in, go to MainTabs
           navigation.replace("MainTabs")
         } else {
-          // If not logged in, go to Login
-          navigation.replace("Login") 
+          // FIX: Navigating to Welcome instead of Login
+          navigation.replace("Welcome") 
         }
       } catch (e) {
         console.error("Session check failed", e)
-        // On error, default to Login
-        navigation.replace("Login")
+        navigation.replace("Welcome")
       }
     }
 
@@ -35,7 +33,6 @@ const SplashScreen = ({ navigation }) => {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <View style={styles.content}>
         <View style={styles.logoContainer}>
-          {/* UPDATED: Using the correct filename provided */}
           <Image
             source={require("../../assets/splash-logo.png")}
             style={styles.logo}
@@ -54,7 +51,7 @@ const SplashScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF", // White background
+    backgroundColor: "#FFFFFF", 
   },
   content: {
     flex: 1,
@@ -77,14 +74,14 @@ const styles = StyleSheet.create({
   },
   brandText: {
     fontSize: 28,
-    color: "#000000", // Black text
+    color: "#000000",
     fontWeight: "bold",
     letterSpacing: 1,
     marginBottom: 16, 
   },
   taglineText: {
     fontSize: 16,
-    color: "#666666", // Grey text
+    color: "#666666",
     fontWeight: "400",
     letterSpacing: 1,
   },
