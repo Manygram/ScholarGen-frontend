@@ -34,7 +34,7 @@ const LoginScreen = () => {
     setIsLoading(true);
     try {
       console.log('Attempting login...');
-      
+
       // Use authService.login which uses the correct apiClient
       const response = await authService.login(formData.email, formData.password);
 
@@ -84,7 +84,7 @@ const LoginScreen = () => {
       <StatusBar barStyle="dark-content" backgroundColor={theme.background} />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.header}>
-          <Text style={[styles.title, { color: theme.text }]}>Welcome back,</Text>
+          <Text style={[styles.title, { color: theme.text }]}>Hello there,</Text>
           <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Good to see you again</Text>
         </View>
 
@@ -109,13 +109,13 @@ const LoginScreen = () => {
             <Text style={[styles.forgotPasswordText, { color: theme.primary }]}>Forgot Password?</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[styles.signInButton, { backgroundColor: theme.primary }]} 
+          <TouchableOpacity
+            style={[styles.signInButton, { backgroundColor: theme.primary }]}
             onPress={handleLogin}
             disabled={isLoading}
           >
             <Text style={styles.signInButtonText}>
-                {isLoading ? 'Signing In...' : 'Sign In'}
+              {isLoading ? 'Signing In...' : 'Sign In'}
             </Text>
           </TouchableOpacity>
 

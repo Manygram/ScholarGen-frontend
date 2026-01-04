@@ -1,15 +1,31 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, StatusBar, Image } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
 const SplashScreen = ({ navigation }) => {
   useEffect(() => {
-    const timer = setTimeout(() => {
-      navigation.replace('Welcome');
-    }, 3000);
+    const checkLogin = async () => {
+      try {
+        // Minimum delay for branding
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
-    return () => clearTimeout(timer);
+        // Check for session
+        const token = await AsyncStorage.getItem('userToken');
+        if (token) {
+          // Optional: Validate token with an API call here if needed in future
+          navigation.replace('MainTabs');
+        } else {
+          navigation.replace('Welcome');
+        }
+      } catch (e) {
+        console.error("Session check failed", e);
+        navigation.replace('Welcome');
+      }
+    };
+
+    checkLogin();
   }, [navigation]);
 
   return (
@@ -18,7 +34,7 @@ const SplashScreen = ({ navigation }) => {
       <View style={styles.content}>
         <View style={styles.logoContainer}>
           <Image
-            source={require('../../assets/splash-logo.png')}
+            source={require('../../assets/images/scholarx-logo-removebg-preview.png')}
             style={styles.logo}
             resizeMode="contain"
           />

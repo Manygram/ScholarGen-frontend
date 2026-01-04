@@ -279,7 +279,7 @@ const GamesScreen = ({ navigation }) => {
                         <Ionicons name="play-circle" size={48} color="rgba(255,255,255,0.8)" />
                     </View>
                     <Image
-                        source={{ uri: 'https://img.freepik.com/free-vector/golden-coins-falling-dark-background_107791-209.jpg' }}
+                        source={require('../../assets/images/games_bg.jpg')}
                         style={[StyleSheet.absoluteFill, { opacity: 0.1, borderRadius: 20 }]}
                     />
                 </TouchableOpacity>

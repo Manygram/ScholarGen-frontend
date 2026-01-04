@@ -19,7 +19,7 @@ import { useTheme } from "../context/ThemeContext"
 import axios from "axios"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 
-const API_BASE_URL = "https://scholargenapi.onrender.com/api"
+const API_BASE_URL = "https://api.scholargens.com/api"
 const YEARS = Array.from({ length: 2025 - 1994 + 1 }, (_, i) => (2025 - i).toString())
 
 const StudyScreen = ({ navigation }) => {
@@ -36,6 +36,10 @@ const StudyScreen = ({ navigation }) => {
     const fetchSubjects = async () => {
       try {
         const token = await AsyncStorage.getItem("userToken")
+        if (!token) {
+          setLoading(false)
+          return
+        }
         const response = await axios.get(`${API_BASE_URL}/subjects`, {
           headers: { Authorization: `Bearer ${token}` },
         })

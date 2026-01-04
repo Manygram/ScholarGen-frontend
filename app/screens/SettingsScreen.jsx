@@ -140,7 +140,7 @@ const SettingsScreen = ({ navigation }) => {
           <View style={[styles.streakContainer, { backgroundColor: isDarkMode ? '#1F2937' : '#FFF0E6', borderColor: isDarkMode ? '#374151' : '#FFDDC1' }]}>
             <View style={styles.streakContent}>
               <Image
-                source={{ uri: 'https://rztgg9jpu58dsvst.public.blob.vercel-storage.com/IMG_7565.png' }}
+                source={require('../../assets/images/profile_placeholder.png')}
                 style={styles.streakIcon}
                 resizeMode="contain"
               />

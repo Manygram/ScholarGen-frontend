@@ -48,10 +48,7 @@ const SubjectVideosScreen = ({ navigation, route }) => {
         return {
           id,
           url: video,
-          title,
-          thumbnail: id
-            ? `https://img.youtube.com/vi/${id}/hqdefault.jpg`
-            : undefined,
+          thumbnail: undefined,
         };
       } else {
         // It's an object from Realm
@@ -97,7 +94,11 @@ const SubjectVideosScreen = ({ navigation, route }) => {
             activeOpacity={0.8}
             onPress={() => openVideo(video.id)}
           >
-            <Image source={{ uri: video.thumbnail }} style={styles.thumbnail} resizeMode="cover" />
+            {video.thumbnail ? (
+              <Image source={{ uri: video.thumbnail }} style={styles.thumbnail} resizeMode="cover" />
+            ) : (
+              <Image source={require('../../assets/splash-logo.png')} style={styles.thumbnail} resizeMode="cover" />
+            )}
             <View style={styles.videoInfo}>
               <Text style={[styles.videoTitle, { color: theme.text }]} numberOfLines={2}>{video.title}</Text>
               <View style={styles.videoMeta}>
@@ -126,6 +127,7 @@ const SubjectVideosScreen = ({ navigation, route }) => {
           {selectedVideoId && (
             <WebView
               style={styles.webView}
+              originWhitelist={['*']}
               source={{
                 uri: `https://www.youtube.com/embed/${selectedVideoId}?autoplay=1&rel=0&modestbranding=1&controls=1&showinfo=0&fs=1&playsinline=1`,
               }}

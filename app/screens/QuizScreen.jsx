@@ -19,7 +19,7 @@ import { useTheme } from "../context/ThemeContext"
 import axios from "axios"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 
-const API_BASE_URL = "https://scholargenapi.onrender.com/api"
+const API_BASE_URL = "https://api.scholargens.com/api"
 
 const QuizScreen = ({ navigation, route }) => {
     const { theme, isDarkMode } = useTheme()
@@ -66,6 +66,9 @@ const QuizScreen = ({ navigation, route }) => {
 
     const [studyShowAnswer, setStudyShowAnswer] = useState(false)
 
+    // "isEvaluating" now effectively means "Is Checked" in Study Mode
+    const [isEvaluating, setIsEvaluating] = useState(false)
+
     useEffect(() => {
         const fetchQuestions = async () => {
             setIsLoading(true)
@@ -81,9 +84,13 @@ const QuizScreen = ({ navigation, route }) => {
 
                 const response = await axios.post(`${API_BASE_URL}/quiz/start`, payload, authHeader)
 
-                if (response.data && response.data.quiz) {
-                    setQuizId(response.data.quiz._id)
-                    const { groupedQuestions } = response.data.quiz
+                if (response.data && (response.data.quiz || response.data._id)) {
+                    // Handle structure: response.data.quiz._id OR response.data._id depending on backend
+                    const qId = response.data.quiz ? response.data.quiz._id : response.data._id
+                    console.log("Quiz ID captured:", qId)
+                    setQuizId(qId)
+
+                    const groupedQuestions = response.data.quiz ? response.data.quiz.groupedQuestions : response.data.groupedQuestions
 
                     const mappedQuestions = {}
                     const initIndices = {}
@@ -99,6 +106,7 @@ const QuizScreen = ({ navigation, route }) => {
 
                         mappedQuestions[id] = rawQuestions.map((q) => ({
                             ...q,
+                            explanation: q.explanation || "No explanation provided.",
                             questionImage: q.images && q.images.length > 0 ? q.images[0] : null,
                             explanationImage: q.explanationImage || null,
                             options: q.options.map((opt) => ({ text: opt.text, image: opt.image })),
@@ -149,6 +157,7 @@ const QuizScreen = ({ navigation, route }) => {
         }
     }, [timeLeft, mode, currentSubjectIndex, isSubmitting, activeSubjects])
 
+
     // Handlers
     const currentSubjectObj = activeSubjects[currentSubjectIndex]
     const currentSubjectId = currentSubjectObj?._id
@@ -159,33 +168,29 @@ const QuizScreen = ({ navigation, route }) => {
     const formatTime = (s) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`
 
     const handleOptionSelect = (option) => {
-        if (showExplanation && mode !== "exam") return
+        if ((showExplanation || isEvaluating) && mode !== "exam") return
         setUserAnswers((prev) => ({
             ...prev,
             [currentSubjectId]: { ...prev[currentSubjectId], [currentQIndex]: option },
         }))
     }
 
-    const handleNext = () => {
-        const isPractice = mode === "practice" || mode === "study"
-        const hasAnswered = userAnswers[currentSubjectId]?.[currentQIndex]
-
-        if (isPractice && hasAnswered && !showExplanation) {
-            setShowExplanation(true)
-            return
-        }
-
+    const moveToNextQuestion = () => {
         if (currentQIndex < currentQuestions.length - 1) {
             setSubjectQuestionIndices((prev) => ({ ...prev, [currentSubjectId]: prev[currentSubjectId] + 1 }))
             setStudyShowAnswer(false)
+            setShowExplanation(false)
+            setIsEvaluating(false)
         } else if (currentSubjectIndex < activeSubjects.length - 1) {
             Alert.alert("Next Subject", `Switch to ${activeSubjects[currentSubjectIndex + 1].name}?`, [
-                { text: "No", style: "cancel" },
+                { text: "No", style: "cancel", onPress: () => setIsEvaluating(false) },
                 {
                     text: "Yes",
                     onPress: () => {
                         setCurrentSubjectIndex((prev) => prev + 1)
                         setStudyShowAnswer(false)
+                        setShowExplanation(false)
+                        setIsEvaluating(false)
                     },
                 },
             ])
@@ -194,26 +199,129 @@ const QuizScreen = ({ navigation, route }) => {
         }
     }
 
+    const handleNext = () => {
+        const isPractice = mode === "practice" || mode === "study"
+        const selectedOption = userAnswers[currentSubjectId]?.[currentQIndex]
+
+        if (isPractice) {
+            // "Check" State
+            if (!isEvaluating) {
+                if (!selectedOption) {
+                    Alert.alert("Select an Option", "Please select an answer to check.")
+                    return
+                }
+                // Show Feedback (Green/Red & Explanation)
+                setIsEvaluating(true)
+                setStudyShowAnswer(true)
+                setShowExplanation(true)
+                return
+            }
+
+            // "Next" State (Already Checked)
+            if (isEvaluating) {
+                moveToNextQuestion()
+                return
+            }
+        }
+
+        // Exam mode: Move immediately
+        moveToNextQuestion()
+    }
+
     const handlePrev = () => {
+        // if (isEvaluating) return // Allow traversing back? usually yes
         if (currentQIndex > 0) {
             setSubjectQuestionIndices((prev) => ({ ...prev, [currentSubjectId]: prev[currentSubjectId] - 1 }))
             setStudyShowAnswer(false)
+            setShowExplanation(false)
+            setIsEvaluating(false)
         }
     }
 
     const handleSubmit = async () => {
         if (isSubmitting) return
         setIsSubmitting(true)
-        // ... (Submit logic same as previous)
-        setResultModalVisible(true)
+        setIsEvaluating(false)
+
+        try {
+            const token = await AsyncStorage.getItem("userToken")
+            const authHeader = { headers: { Authorization: `Bearer ${token}` } }
+
+            // Construct answers map: { questionId: selectedOption }
+            const formattedAnswers = {}
+            let totalScore = 0
+            let totalPossible = 0
+
+            // Calculate detailed results locally for immediate display if needed, 
+            // but primarily rely on backend or simple calc here for the "Score / 100" req.
+            const subjectScores = {}
+
+            activeSubjects.forEach(sub => {
+                const subId = sub._id
+                const questions = questionsState[subId] || []
+                const answers = userAnswers[subId] || {}
+
+                let subCorrect = 0
+
+                questions.forEach((q, idx) => {
+                    const selected = answers[idx]
+                    if (selected) {
+                        formattedAnswers[q._id] = selected
+                    }
+                    if (selected === q.correctOption) {
+                        subCorrect++
+                    }
+                })
+
+                // Calculate score / 100
+                const percentage = questions.length > 0 ? (subCorrect / questions.length) * 100 : 0
+                subjectScores[sub.name] = Math.round(percentage)
+                totalScore += subCorrect
+                totalPossible += questions.length
+            })
+
+            // Just for total display
+            const totalAvg = activeSubjects.length > 0
+                ? Object.values(subjectScores).reduce((a, b) => a + b, 0) / activeSubjects.length
+                : 0
+
+            setFinalScore(Math.round(totalAvg)) // Overall average percentage
+            setFinalTotal(100)
+
+            const payload = {
+                answers: formattedAnswers,
+                timeSpentPerSubject: timeSpentPerSubject
+            }
+
+            if (!quizId) {
+                console.error("No Quiz ID found. Cannot submit.")
+                Alert.alert("Error", "Quiz ID missing. Cannot submit results.")
+                setIsSubmitting(false)
+                return
+            }
+
+            console.log(`Submitting quiz ${quizId} to ${API_BASE_URL}/quiz/${quizId}/submit...`, payload)
+
+            const response = await axios.post(`${API_BASE_URL}/quiz/${quizId}/submit`, payload, authHeader)
+
+            // You might want to pass the result data to the modal or navigation
+            setResultModalVisible(true)
+
+        } catch (error) {
+            console.error("Quiz Submit Error:", error)
+            const errMsg = error.response ? `Status: ${error.response.status}` : error.message
+            Alert.alert("Submission Failed", `Could not submit quiz results. ${errMsg}`)
+            setIsSubmitting(false)
+        }
     }
 
     const getOptionStyle = (optionText) => {
         const selected = userAnswers[currentSubjectId]?.[currentQIndex] === optionText
-        const isStudy = mode === "study"
+        const isStudy = mode === "study" || mode === "practice"
         const correct = currentQuestion?.correctOption === optionText
 
-        if (isStudy && studyShowAnswer) {
+        // Only show Green/Red if IsEvaluating (i.e., Checked) OR manually toggled Explanation
+        if (isStudy && (isEvaluating || studyShowAnswer)) {
             if (correct) return { borderColor: "#4CAF50", backgroundColor: "rgba(76, 175, 80, 0.1)" }
             if (selected && !correct) return { borderColor: "#F44336", backgroundColor: "rgba(244, 67, 54, 0.1)" }
         }
@@ -322,11 +430,11 @@ const QuizScreen = ({ navigation, route }) => {
                                 )}
                             </View>
 
-                            {mode === "study" && studyShowAnswer && currentQuestion.correctOption === opt.text && (
+                            {mode === "study" && (isEvaluating || studyShowAnswer) && currentQuestion.correctOption === opt.text && (
                                 <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
                             )}
                             {mode === "study" &&
-                                studyShowAnswer &&
+                                (isEvaluating || studyShowAnswer) &&
                                 userAnswers[currentSubjectId]?.[currentQIndex] === opt.text &&
                                 currentQuestion.correctOption !== opt.text && (
                                     <Ionicons name="close-circle" size={24} color="#F44336" />
@@ -337,10 +445,13 @@ const QuizScreen = ({ navigation, route }) => {
 
                 {mode === "study" && (
                     <TouchableOpacity
-                        style={[styles.explanationToggle, { borderColor: theme.primary }]}
-                        onPress={() => setStudyShowAnswer(!studyShowAnswer)}
+                        style={[styles.explanationToggle, { borderColor: theme.primary, backgroundColor: studyShowAnswer ? theme.primary : 'transparent' }]}
+                        onPress={() => {
+                            console.log("Toggling explanation. Current:", studyShowAnswer);
+                            setStudyShowAnswer(!studyShowAnswer);
+                        }}
                     >
-                        <Text style={{ color: theme.primary, fontWeight: "bold" }}>
+                        <Text style={{ color: studyShowAnswer ? '#fff' : theme.primary, fontWeight: "bold" }}>
                             {studyShowAnswer ? "Hide Answer & Explanation" : "Show Answer & Explanation"}
                         </Text>
                     </TouchableOpacity>
@@ -370,18 +481,33 @@ const QuizScreen = ({ navigation, route }) => {
                     {currentQIndex + 1}/{currentQuestions.length}
                 </Text>
                 <TouchableOpacity onPress={handleNext}>
-                    <Text style={{ color: theme.primary }}>Next</Text>
+                    <Text style={{ color: theme.primary, fontWeight: "bold" }}>
+                        {(mode === 'study' || mode === 'practice') ? (isEvaluating ? "Next" : "Check") : "Next"}
+                    </Text>
                 </TouchableOpacity>
             </View>
 
             <Modal visible={resultModalVisible} transparent={true}>
-                <View style={[styles.container, { backgroundColor: theme.background, padding: 20, justifyContent: "center" }]}>
-                    <Text style={{ fontSize: 24, color: theme.text, textAlign: "center" }}>Quiz Completed!</Text>
+                <View style={[styles.container, { backgroundColor: theme.background, padding: 20, justifyContent: "center", alignItems: 'center' }]}>
+                    <Ionicons name="trophy" size={80} color="#FFD700" />
+                    <Text style={{ fontSize: 28, fontWeight: 'bold', color: theme.text, marginTop: 20 }}>Quiz Completed!</Text>
+
+                    <View style={{ marginVertical: 30, alignItems: 'center' }}>
+                        <Text style={{ fontSize: 16, color: theme.textSecondary }}>Your Score</Text>
+                        <Text style={{ fontSize: 48, fontWeight: 'bold', color: theme.primary }}>{finalScore}%</Text>
+                    </View>
+
                     <TouchableOpacity
-                        style={[styles.submitButton, { backgroundColor: theme.primary, alignSelf: "center", marginTop: 20 }]}
-                        onPress={() => navigation.navigate("MainTabs")}
+                        style={[styles.submitButton, { backgroundColor: theme.primary, paddingHorizontal: 40, paddingVertical: 15 }]}
+                        onPress={() => {
+                            setResultModalVisible(false)
+                            navigation.reset({
+                                index: 0,
+                                routes: [{ name: 'MainTabs' }],
+                            })
+                        }}
                     >
-                        <Text style={{ color: "#fff" }}>Return Home</Text>
+                        <Text style={{ color: "#fff", fontSize: 18, fontWeight: 'bold' }}>Return Home</Text>
                     </TouchableOpacity>
                 </View>
             </Modal>

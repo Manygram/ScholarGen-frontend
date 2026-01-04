@@ -29,7 +29,7 @@ const HomeScreen = ({ navigation }) => {
   const sliderImages = [
     {
       id: 1,
-      title: 'Master UTME 2025',
+      title: 'Master UTME 2026',
       subtitle: 'Your path to success starts here',
       image: require('../../assets/hero/hero1.jpg'),
     },
@@ -57,42 +57,10 @@ const HomeScreen = ({ navigation }) => {
   ];
 
   // Flashcard data
-  const flashcardsData = [
-    {
-      Q: "_____ is an economic activity which is widely recognized as a source of innovation that has an impact on economic development.",
-      A: "Marketing",
-      B: "Entrepreneurship", 
-      C: "Finance",
-      D: "Human resource management",
-      Ans: "B",
-      Solution: "Entrepreneurship is recognized as a key economic activity that drives innovation and contributes significantly to economic development through job creation, market expansion, and technological advancement."
-    },
-    {
-      Q: "What is the engine for economic development and an integral part of entrepreneurship?",
-      A: "Financial management",
-      B: "Market research",
-      C: "New venture creation",
-      D: "Resource allocation",
-      Ans: "C",
-      Solution: "New venture creation is considered the engine for economic development as it generates new jobs, introduces innovative products and services, and stimulates economic growth. It's an integral part of entrepreneurship as it represents the implementation of entrepreneurial ideas."
-    },
-    {
-      Q: "An individual who typically has limited resources attempting to efficiently utilize it to exploit a viable business idea is?",
-      A: "Manager",
-      B: "Investor",
-      C: "Consultant",
-      D: "Entrepreneur",
-      Ans: "D",
-      Solution: "An entrepreneur is defined as someone who identifies opportunities, takes risks, and efficiently utilizes limited resources to exploit viable business ideas for profit. This resource optimization is a key characteristic that distinguishes entrepreneurs from other business roles."
-    }
-  ];
+
 
   // Flashcard states
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [touchStartX, setTouchStartX] = useState(0);
-  const [touchStartY, setTouchStartY] = useState(0);
-  const [touchMoved, setTouchMoved] = useState(false);
+
 
   // Recent activities from Database
   const { activities } = useDatabase();
@@ -133,96 +101,9 @@ const HomeScreen = ({ navigation }) => {
   };
 
   // Flashcard functions
-  const handleCardFlip = () => {
-    setIsFlipped(!isFlipped);
-  };
 
-  const handleTouchStart = (event) => {
-    const touch = event.nativeEvent.touches[0];
-    setTouchStartX(touch.pageX);
-    setTouchStartY(touch.pageY);
-    setTouchMoved(false);
-  };
 
-  const handleTouchMove = (event) => {
-    if (!touchMoved) {
-      const touch = event.nativeEvent.touches[0];
-      const deltaX = touch.pageX - touchStartX;
-      const deltaY = touch.pageY - touchStartY;
-      
-      if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
-        setTouchMoved(true);
-      }
-    }
-  };
 
-  const handleTouchEnd = (event) => {
-    if (!touchMoved) {
-      // This was a tap, flip the card
-      handleCardFlip();
-      return;
-    }
-
-    const touch = event.nativeEvent.changedTouches[0];
-    const deltaX = touch.pageX - touchStartX;
-    const deltaY = touch.pageY - touchStartY;
-    
-    const absDeltaX = Math.abs(deltaX);
-    const absDeltaY = Math.abs(deltaY);
-    
-    if (absDeltaX > 80 && absDeltaX > absDeltaY) {
-      // Horizontal swipe
-      if (deltaX > 0) {
-        // Swipe right - previous card
-        setCurrentCardIndex(prev => Math.max(0, prev - 1));
-      } else {
-        // Swipe left - next card
-        setCurrentCardIndex(prev => Math.min(flashcardsData.length - 1, prev + 1));
-      }
-      setIsFlipped(false); // Reset flip state when changing cards
-    }
-  };
-
-  const renderFlashcard = () => {
-    const card = flashcardsData[currentCardIndex];
-    if (!card) return null;
-
-    const questionText = card.Q.replace(/^\d+\.\s+/, '');
-    const answerOption = card.Ans;
-    const answerText = card[answerOption] || '';
-
-    return (
-      <View style={styles.flashcardContainer}>
-        <View 
-          style={[
-            styles.flashcard,
-            isFlipped && styles.flashcardFlipped
-          ]}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          {/* Front of card */}
-          <View style={[styles.flashcardFace, styles.flashcardFront]}>
-            <Text style={styles.cardNumber}>{currentCardIndex + 1}/{flashcardsData.length}</Text>
-            <Text style={styles.questionText}>{questionText}</Text>
-            <View style={styles.tapHint}>
-              <Ionicons name="hand-left-outline" size={20} color="#007AFF" />
-              <Text style={styles.tapHintText}>Tap to flip</Text>
-            </View>
-          </View>
-
-          {/* Back of card */}
-          <View style={[styles.flashcardFace, styles.flashcardBack]}>
-            <Text style={styles.answerText}>{answerText}</Text>
-            <TouchableOpacity style={styles.flipButton} onPress={handleCardFlip}>
-              <Ionicons name="refresh-outline" size={24} color="#007AFF" />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    );
-  };
 
   const renderSliderItem = ({ item }) => (
     <View style={styles.slideItem}>
@@ -317,23 +198,7 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* Flashcards Section */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>Daily Flashcards</Text>
-          
-          {/* Progress Bar */}
-          <View style={styles.progressContainer}>
-            <View 
-              style={[
-                styles.progressBar, 
-                { width: `${((currentCardIndex + 1) / flashcardsData.length) * 100}%` }
-              ]} 
-            />
-          </View>
 
-          {/* Flashcard */}
-          {renderFlashcard()}
-        </View>
 
         {/* Stats Overview */}
         <View style={styles.section}>

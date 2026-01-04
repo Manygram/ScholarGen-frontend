@@ -12,17 +12,19 @@ import {
     Alert,
     Modal,
     ActivityIndicator,
+    Platform,
 } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useTheme } from "../context/ThemeContext"
 import axios from "axios"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 
-const API_BASE_URL = "https://scholargenapi.onrender.com/api"
-const YEARS = Array.from({ length: 2024 - 1994 + 1 }, (_, i) => (2024 - i).toString())
+const API_BASE_URL = "https://api.scholargens.com/api"
+// Updated to include 2026
+const YEARS = Array.from({ length: 2026 - 1994 + 1 }, (_, i) => (2026 - i).toString())
 
 const SubjectSelectionScreen = ({ navigation, route }) => {
-    const { theme } = useTheme()
+    const { theme, isDarkMode } = useTheme()
     const { categoryTitle } = route.params
 
     const [dbSubjects, setDbSubjects] = useState([])
@@ -37,6 +39,12 @@ const SubjectSelectionScreen = ({ navigation, route }) => {
         const fetchSubjects = async () => {
             try {
                 const token = await AsyncStorage.getItem("userToken")
+
+                if (!token) {
+                    setLoading(false)
+                    return
+                }
+
                 const response = await axios.get(`${API_BASE_URL}/subjects`, {
                     headers: { Authorization: `Bearer ${token}` },
                 })
@@ -45,16 +53,9 @@ const SubjectSelectionScreen = ({ navigation, route }) => {
 
                 subjects = subjects.map((sub) => {
                     const subName = (sub.name || "").toLowerCase()
-                    // Physics strict ID fix
                     if (subName.includes("physics")) {
-                        console.log("Applying Hardcoded ID for Physics:", sub.name)
-                        return {
-                            ...sub,
-                            _id: "695780098f1e7a1a3a935f07",
-                            name: "Physics",
-                        }
+                        return { ...sub, _id: "695780098f1e7a1a3a935f07", name: "Physics" }
                     }
-                    // English consistency
                     if (subName.includes("use of english") || subName === "english") {
                         return { ...sub, name: "English" }
                     }
@@ -81,11 +82,7 @@ const SubjectSelectionScreen = ({ navigation, route }) => {
     const toggleSubject = (subject) => {
         const subId = (subject._id || "").toString()
 
-        if (!subId) {
-            console.error("Subject missing ID during toggle:", subject)
-            Alert.alert("Error", `Cannot select ${subject.name} (Missing ID)`)
-            return
-        }
+        if (!subId) return
 
         if (subject.name.toLowerCase().includes("english")) {
             Alert.alert("Compulsory", "English is compulsory.")
@@ -116,6 +113,12 @@ const SubjectSelectionScreen = ({ navigation, route }) => {
     }
 
     const openYearModal = (subject) => {
+        const isSelected = selectedSubjects.some((s) => s._id === subject._id)
+        if (!isSelected) {
+            // For consistency with StudyScreen, though in toggle logic we auto-select year. 
+            // But if user clicks dropdown on unselected (unlikely with this UI flow but safe to have)
+            return
+        }
         setCurrentSubjectForYear(subject)
         setYearModalVisible(true)
     }
@@ -123,18 +126,10 @@ const SubjectSelectionScreen = ({ navigation, route }) => {
     const selectYear = (year) => {
         if (currentSubjectForYear && currentSubjectForYear._id) {
             const subId = currentSubjectForYear._id.toString()
-            console.log(`Selecting Year: ${year} for Subject ID: ${subId} (${currentSubjectForYear.name})`)
-
-            setSubjectYears((prev) => {
-                const updated = {
-                    ...prev,
-                    [subId]: year,
-                }
-                console.log("Updated SubjectYears State:", JSON.stringify(updated))
-                return updated
-            })
-        } else {
-            console.error("selectYear called but currentSubjectForYear is invalid", currentSubjectForYear)
+            setSubjectYears((prev) => ({
+                ...prev,
+                [subId]: year,
+            }))
         }
         setYearModalVisible(false)
         setCurrentSubjectForYear(null)
@@ -145,9 +140,6 @@ const SubjectSelectionScreen = ({ navigation, route }) => {
             Alert.alert("Incomplete", "Select 4 subjects to proceed.")
             return
         }
-
-        console.log("Proceeding with:", JSON.stringify(selectedSubjects, null, 2))
-
         navigation.navigate("ExamConfig", {
             selectedSubjects: selectedSubjects,
             subjectYears: subjectYears,
@@ -180,13 +172,17 @@ const SubjectSelectionScreen = ({ navigation, route }) => {
                     <Text style={[styles.itemText, { color: theme.text }]}>{item.name}</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                    style={[styles.yearDropdown, { backgroundColor: theme.background }]}
-                    onPress={() => openYearModal(item)}
-                >
-                    <Text style={{ color: selectedYear ? theme.text : theme.textSecondary }}>{selectedYear || "2023"}</Text>
-                    <Ionicons name="chevron-down" size={16} color={theme.textSecondary} />
-                </TouchableOpacity>
+                {isSelected && (
+                    <TouchableOpacity
+                        style={[styles.yearDropdown, { backgroundColor: theme.background, borderColor: theme.border }]}
+                        onPress={() => openYearModal(item)}
+                    >
+                        <Text style={[styles.yearText, { color: selectedYear ? theme.text : theme.textSecondary }]}>
+                            {selectedYear || "2023"}
+                        </Text>
+                        <Ionicons name="chevron-down" size={14} color={theme.textSecondary} />
+                    </TouchableOpacity>
+                )}
             </View>
         )
     }
@@ -195,7 +191,7 @@ const SubjectSelectionScreen = ({ navigation, route }) => {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-            <StatusBar barStyle="dark-content" />
+            <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
             <View style={[styles.header, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Ionicons name="arrow-back" size={24} color={theme.text} />
@@ -213,7 +209,10 @@ const SubjectSelectionScreen = ({ navigation, route }) => {
 
             <View style={[styles.footer, { backgroundColor: theme.card }]}>
                 <TouchableOpacity
-                    style={[styles.proceedButton, { backgroundColor: selectedSubjects.length === 4 ? theme.primary : "#ccc" }]}
+                    style={[
+                        styles.proceedButton,
+                        { backgroundColor: selectedSubjects.length === 4 ? theme.primary : theme.disabled || "#ccc" }
+                    ]}
                     onPress={handleProceed}
                     disabled={selectedSubjects.length !== 4}
                 >
@@ -221,15 +220,28 @@ const SubjectSelectionScreen = ({ navigation, route }) => {
                 </TouchableOpacity>
             </View>
 
-            <Modal transparent={true} visible={yearModalVisible} onRequestClose={() => setYearModalVisible(false)}>
+            <Modal
+                transparent={true}
+                visible={yearModalVisible}
+                animationType="slide"
+                onRequestClose={() => setYearModalVisible(false)}
+            >
                 <View style={styles.modalOverlay}>
                     <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
+                        <View style={styles.modalHeader}>
+                            <Text style={[styles.modalTitle, { color: theme.text }]}>
+                                Select Year for {currentSubjectForYear ? currentSubjectForYear.name : ""}
+                            </Text>
+                            <TouchableOpacity onPress={() => setYearModalVisible(false)}>
+                                <Ionicons name="close" size={24} color={theme.text} />
+                            </TouchableOpacity>
+                        </View>
                         <FlatList
                             data={YEARS}
                             keyExtractor={(item) => item}
                             renderItem={({ item }) => (
-                                <TouchableOpacity style={styles.yearItem} onPress={() => selectYear(item)}>
-                                    <Text style={[styles.yearText, { color: theme.text }]}>{item}</Text>
+                                <TouchableOpacity style={[styles.yearItem, { borderBottomColor: theme.border }]} onPress={() => selectYear(item)}>
+                                    <Text style={[styles.yearTextDropdown, { color: theme.text }]}>{item}</Text>
                                 </TouchableOpacity>
                             )}
                         />
@@ -246,10 +258,10 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: 20,
-        paddingTop: 40,
+        paddingHorizontal: 20,
+        paddingVertical: 16,
+        paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 20 : 20,
         borderBottomWidth: 1,
-        borderColor: "#eee",
     },
     headerTitle: { fontSize: 18, fontWeight: "700" },
     listContent: { padding: 20, paddingBottom: 100 },
@@ -261,6 +273,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         borderWidth: 1,
         justifyContent: "space-between",
+        minHeight: 60,
     },
     subjectRow: { flexDirection: "row", alignItems: "center", flex: 1 },
     checkbox: {
@@ -276,19 +289,52 @@ const styles = StyleSheet.create({
     yearDropdown: {
         flexDirection: "row",
         alignItems: "center",
-        paddingHorizontal: 12,
-        paddingVertical: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 6,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: "#E5E5EA",
+        marginLeft: 10,
+        minWidth: 90,
+        justifyContent: "space-between",
     },
-    footer: { position: "absolute", bottom: 0, left: 0, right: 0, padding: 20, borderTopWidth: 1, borderColor: "#eee" },
-    proceedButton: { alignItems: "center", paddingVertical: 16, borderRadius: 12 },
+    yearText: { fontSize: 12 },
+    footer: {
+        padding: 20,
+        borderTopWidth: 1,
+        borderTopColor: "rgba(0,0,0,0.05)",
+        position: "absolute", bottom: 0, left: 0, right: 0
+    },
+    proceedButton: {
+        alignItems: "center",
+        paddingVertical: 16,
+        borderRadius: 12,
+        shadowColor: "#007AFF",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 4,
+    },
     proceedButtonText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
-    modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", padding: 40 },
-    modalContent: { borderRadius: 12, padding: 20, maxHeight: "60%" },
-    yearItem: { paddingVertical: 15, borderBottomWidth: 1, borderBottomColor: "#eee" },
-    yearText: { fontSize: 16, textAlign: "center" },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.5)",
+        justifyContent: "flex-end",
+    },
+    modalContent: {
+        height: "50%",
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        padding: 20,
+    },
+    modalHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 20,
+    },
+    modalTitle: { fontSize: 18, fontWeight: "bold" },
+    yearItem: { paddingVertical: 16, borderBottomWidth: 1 },
+    yearTextDropdown: { fontSize: 16, textAlign: "center" },
 })
 
 export default SubjectSelectionScreen

@@ -74,6 +74,8 @@ const VideosScreen = ({ navigation }) => {
                   <Image source={{ uri: thumbnail }} style={styles.videoThumbnail} resizeMode="cover" />
                 ) : (
                   <View style={[styles.subjectThumbnailPlaceholder, { backgroundColor: subject.color }]}>
+                    {/* Local fallback image if needed, or just the icon */}
+                    <Image source={require('../../assets/splash-logo.png')} style={{ width: '100%', height: '100%', opacity: 0.3, position: 'absolute' }} resizeMode="cover" />
                     <Ionicons name={subject.icon} size={64} color="rgba(255,255,255,0.8)" />
                   </View>
                 )}
@@ -110,6 +112,7 @@ const VideosScreen = ({ navigation }) => {
           {selectedVideo && (
             <WebView
               style={styles.webView}
+              originWhitelist={['*']}
               source={{
                 uri: `https://www.youtube.com/embed/${selectedVideo.videoId}?autoplay=1&rel=0&modestbranding=1&controls=1&showinfo=0&fs=1&playsinline=1`,
               }}

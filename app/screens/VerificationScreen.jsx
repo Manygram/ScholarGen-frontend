@@ -67,35 +67,24 @@ const VerificationScreen = () => {
 
   const handleResendOTP = async () => {
     try {
-      const registrationEmail = await AsyncStorage.getItem('registrationEmail');
+      const emailToUse = email || await AsyncStorage.getItem('registrationEmail');
 
-      if (!registrationEmail) {
+      if (!emailToUse) {
         Alert.alert('Error', 'Email not found. Please try registering again.');
         return;
       }
 
-      const response = await fetch(`${API_BASE}/auth/request-otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: registrationEmail,
-          appType: 'scholarx'
-        }),
-      });
+      const { status, data } = await authService.resendOTP(emailToUse);
 
-      const data = await response.json();
-
-      if (response.ok && data.message) {
+      if (status === 200 || status === 201) {
         Alert.alert('Success', 'Verification code resent successfully!');
       } else {
-        // Handle specific error messages from API (matching HTML files approach)
-        const errorMessage = data.error || data.message || 'Failed to resend verification code.';
+        const errorMessage = data?.message || data?.error || 'Failed to resend verification code.';
         Alert.alert('Error', errorMessage);
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to resend verification code. Please try again.');
+      const errorMsg = error.response?.data?.message || 'Failed to resend verification code. Please try again.';
+      Alert.alert('Error', errorMsg);
     }
   };
 
