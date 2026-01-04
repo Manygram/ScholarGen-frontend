@@ -34,7 +34,7 @@ const SplashScreen = ({ navigation }) => {
       <View style={styles.content}>
         <View style={styles.logoContainer}>
           <Image
-            source={require('../../assets/images/scholarx-logo-removebg-preview.png')}
+            source={require('../../assets/scholarx-logo-removebg-preview.png')}
             style={styles.logo}
             resizeMode="contain"
           />
