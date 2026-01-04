@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = 'https://scholargenapi.onrender.com/api';
+const BASE_URL = 'https://api.scholargens.com';
 
 /**
  * Common headers for all requests
@@ -140,3 +140,4 @@ export const apiClient = {
         }
     }
 };
+
