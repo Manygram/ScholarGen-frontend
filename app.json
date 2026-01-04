@@ -51,10 +51,11 @@
     },
 
     "extra": {
-      "API_BASE_URL": "https://app.scholargens.com",
+      "API_BASE_URL": "https://api.scholargens.com",
       "eas": {
         "projectId": "a75a8403-8fb4-488e-9bf9-5a5f3fcc59f1"
       }
     }
   }
 }
+
