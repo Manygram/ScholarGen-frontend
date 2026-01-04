@@ -1,311 +1,311 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, StatusBar, TouchableOpacity, TextInput, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { MaterialIcons as Icon } from '@expo/vector-icons';
-import { useTheme } from '../context/ThemeContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { authService } from '../services/authService';
-import LoadingOverlay from '../components/LoadingOverlay';
+"use client"
 
-const API_BASE = 'https://my-easy-school-api.onrender.com/api';
-const { width, height } = Dimensions.get('window');
+import { useState } from "react"
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  StatusBar,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native"
+import { MaterialIcons as Icon } from "@expo/vector-icons"
+import { useTheme } from "../context/ThemeContext"
+import { authService } from "../services/authService"
+import LoadingOverlay from "../components/LoadingOverlay"
+
+const API_BASE = "https://api.scholargens.com/api"
+const { width, height } = Dimensions.get("window")
 
 export default function WelcomeScreen({ navigation }) {
-  const { theme } = useTheme();
-  const [activeTab, setActiveTab] = useState('signin');
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { theme } = useTheme()
+  const [activeTab, setActiveTab] = useState("signin")
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    fullName: '',
-    referralCode: ''
-  });
-  const [errors, setErrors] = useState({});
+    email: "",
+    password: "",
+    fullName: "",
+    referralCode: "",
+  })
+  const [errors, setErrors] = useState({})
 
   const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
 
   const validateForm = () => {
-    const newErrors = {};
+    const newErrors = {}
 
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required"
     } else if (!validateEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
+      newErrors.email = "Please enter a valid email"
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required"
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = "Password must be at least 6 characters"
     }
 
-    if (activeTab === 'signup') {
+    if (activeTab === "signup") {
       if (!formData.fullName) {
-        newErrors.fullName = 'Full name is required';
+        newErrors.fullName = "Full name is required"
       }
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleSignUp = async () => {
-    if (!validateForm()) return;
+    if (!validateForm()) return
 
-    setIsLoading(true);
+    setIsLoading(true)
     try {
       // Pass the referral code to your backend
       const { status, data } = await authService.register(
-        formData.fullName, 
-        formData.email, 
-        formData.password, 
-        formData.referralCode
-      );
+        formData.fullName,
+        formData.email,
+        formData.password,
+        formData.referralCode,
+      )
 
       if (status === 200 || status === 201) {
-        Alert.alert('Success', 'Account created! Please verify your email.');
+        Alert.alert("Success", "Account created! Please verify your email.")
         // Navigate to Verification screen with email
-        navigation.navigate('Verification', { email: formData.email });
+        navigation.navigate("Verification", { email: formData.email })
       } else {
-        Alert.alert('Registration Failed', data.message || 'Could not create account.');
+        Alert.alert("Registration Failed", data.message || "Could not create account.")
       }
     } catch (error) {
-      console.error('Registration error:', error);
-      let errorMessage = 'Registration failed.';
+      console.error("Registration error:", error)
+      let errorMessage = "Registration failed."
       if (error.data && error.data.message) {
-        errorMessage = error.data.message;
+        errorMessage = error.data.message
       } else if (error.message) {
-        errorMessage = error.message;
+        errorMessage = error.message
       }
-      Alert.alert('Error', errorMessage);
+      Alert.alert("Error", errorMessage)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const handleSignIn = async () => {
-    if (!validateForm()) return;
+    if (!validateForm()) return
 
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      const response = await authService.login(formData.email, formData.password);
-      const { status, data } = response;
+      const response = await authService.login(formData.email, formData.password)
+      const { status, data } = response
 
-      console.log('Login Response Status:', status);
-      console.log('Login Response Body:', JSON.stringify(data, null, 2));
+      console.log("Login Response Status:", status)
+      console.log("Login Response Body:", JSON.stringify(data, null, 2))
 
       if (status === 200 || status === 201) {
-        // Robust token check
-        const token = data.token || data.user?.token || data.data?.token || data.accessToken || data.access_token;
+        const token = data.accessToken || data.token || data.user?.token || data.data?.token || data.access_token
+
         if (!token) {
-          console.log('MISSING TOKEN. Data:', JSON.stringify(data, null, 2));
-          const keys = Object.keys(data || {}).join(', ');
-          const userKeys = data.user ? Object.keys(data.user).join(', ') : 'No User';
-          throw new Error(`Auth OK but no Token. Root: [${keys}], User: [${userKeys}]`);
+          console.error("[WelcomeScreen] Auth succeeded but no token found in response:", data)
+          throw new Error("Authenticated but no secure token received.")
         }
 
-        const sessionData = { ...(data.user || data), token };
-        await authService.saveSession(sessionData);
+        const sessionData = { ...(data.user || data), token }
+        await authService.saveSession(sessionData)
 
-        Alert.alert('Success', 'Login successful!');
-        navigation.navigate('MainTabs');
+        Alert.alert("Success", "Login successful!")
+        navigation.navigate("MainTabs")
       }
     } catch (error) {
-      console.error('Login error:', error);
-      let errorMessage = 'Login failed.';
+      console.error("Login error:", error)
+      let errorMessage = "Login failed."
 
       if (error.status === 401) {
-        errorMessage = 'Invalid email or password.';
+        errorMessage = "Invalid email or password."
       } else if (error.message) {
-        errorMessage = error.message;
+        errorMessage = error.message
       }
 
-      if (errorMessage && errorMessage.toLowerCase().includes('verified')) {
-        Alert.alert(
-          'Verification Required',
-          'Your account is not verified. Please check your email for the OTP.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Verify Now', onPress: () => navigation.navigate('Verification', { email: formData.email }) }
-          ]
-        );
-        return;
+      if (errorMessage && errorMessage.toLowerCase().includes("verified")) {
+        Alert.alert("Verification Required", "Your account is not verified. Please check your email for the OTP.", [
+          { text: "Cancel", style: "cancel" },
+          { text: "Verify Now", onPress: () => navigation.navigate("Verification", { email: formData.email }) },
+        ])
+        return
       }
 
-      Alert.alert('Login Failed', errorMessage);
+      Alert.alert("Login Failed", errorMessage)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const handleSubmit = () => {
     if (validateForm()) {
-      if (activeTab === 'signin') {
-        handleSignIn();
+      if (activeTab === "signin") {
+        handleSignIn()
       } else {
-        handleSignUp();
+        handleSignUp()
       }
     }
-  };
+  }
 
   const updateFormData = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }))
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: "" }))
     }
-  };
+  }
 
   return (
-    <KeyboardAvoidingView style={[styles.container, { backgroundColor: theme.background }]} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: theme.background }]}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <StatusBar barStyle="dark-content" backgroundColor={theme.background} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={[styles.tabContainer, { backgroundColor: theme.border }]}>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'signin' && [styles.activeTab, { backgroundColor: theme.card }]]}
-              onPress={() => setActiveTab('signin')}
-            >
-              <Text style={[styles.tabText, { color: activeTab === 'signin' ? theme.text : theme.textSecondary }]}>
-                Sign In
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'signup' && [styles.activeTab, { backgroundColor: theme.card }]]}
-              onPress={() => setActiveTab('signup')}
-            >
-              <Text style={[styles.tabText, { color: activeTab === 'signup' ? theme.text : theme.textSecondary }]}>
-                Sign Up
-              </Text>
-            </TouchableOpacity>
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={[styles.tabContainer, { backgroundColor: theme.border }]}>
+              <TouchableOpacity
+                style={[styles.tab, activeTab === "signin" && [styles.activeTab, { backgroundColor: theme.card }]]}
+                onPress={() => setActiveTab("signin")}
+              >
+                <Text style={[styles.tabText, { color: activeTab === "signin" ? theme.text : theme.textSecondary }]}>
+                  Sign In
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.tab, activeTab === "signup" && [styles.activeTab, { backgroundColor: theme.card }]]}
+                onPress={() => setActiveTab("signup")}
+              >
+                <Text style={[styles.tabText, { color: activeTab === "signup" ? theme.text : theme.textSecondary }]}>
+                  Sign Up
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
 
-        {/* Welcome Text */}
-        <View style={styles.welcomeContainer}>
-          <Text style={[styles.welcomeText, { color: theme.text }]}>
-            {activeTab === 'signin' ? 'Welcome back.' : 'Welcome there,'}
-          </Text>
-          <Text style={[styles.subtitleText, { color: theme.textSecondary }]}>
-            {activeTab === 'signin' ? 'Please enter your account here' : 'Please enter your account here'}
-          </Text>
-        </View>
-
-        {/* Form */}
-        <View style={styles.formContainer}>
-          {activeTab === 'signup' && (
-            <>
-              <View style={[styles.inputContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
-                <Icon name="person" size={20} color={theme.textSecondary} style={styles.inputIcon} />
-                <TextInput
-                  style={[styles.input, { color: theme.text }, errors.fullName && styles.inputError]}
-                  placeholder="Full Name"
-                  value={formData.fullName}
-                  onChangeText={(text) => updateFormData('fullName', text)}
-                  placeholderTextColor={theme.textSecondary}
-                />
-              </View>
-              {errors.fullName && <Text style={styles.errorText}>{errors.fullName}</Text>}
-            </>
-          )}
-
-          <View style={[styles.inputContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Icon name="email" size={20} color={theme.textSecondary} style={styles.inputIcon} />
-            <TextInput
-              style={[styles.input, { color: theme.text }, errors.email && styles.inputError]}
-              placeholder="johndoe@gmail.com"
-              value={formData.email}
-              onChangeText={(text) => updateFormData('email', text)}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              placeholderTextColor={theme.textSecondary}
-            />
+          {/* Welcome Text */}
+          <View style={styles.welcomeContainer}>
+            <Text style={[styles.welcomeText, { color: theme.text }]}>
+              {activeTab === "signin" ? "Welcome back." : "Welcome there,"}
+            </Text>
+            <Text style={[styles.subtitleText, { color: theme.textSecondary }]}>
+              {activeTab === "signin" ? "Please enter your account here" : "Please enter your account here"}
+            </Text>
           </View>
-          {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
-          <View style={[styles.inputContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Icon name="lock" size={20} color={theme.textSecondary} style={styles.inputIcon} />
-            <TextInput
-              style={[styles.input, { color: theme.text }, errors.password && styles.inputError]}
-              placeholder="••••••••"
-              value={formData.password}
-              onChangeText={(text) => updateFormData('password', text)}
-              secureTextEntry={!showPassword}
-              placeholderTextColor={theme.textSecondary}
-            />
-            <TouchableOpacity
-              onPress={() => setShowPassword(!showPassword)}
-              style={styles.eyeIcon}
-            >
-              <Icon
-                name={showPassword ? "visibility" : "visibility-off"}
-                size={20}
-                color={theme.textSecondary}
-              />
-            </TouchableOpacity>
-          </View>
-          {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+          {/* Form */}
+          <View style={styles.formContainer}>
+            {activeTab === "signup" && (
+              <>
+                <View style={[styles.inputContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
+                  <Icon name="person" size={20} color={theme.textSecondary} style={styles.inputIcon} />
+                  <TextInput
+                    style={[styles.input, { color: theme.text }, errors.fullName && styles.inputError]}
+                    placeholder="Full Name"
+                    value={formData.fullName}
+                    onChangeText={(text) => updateFormData("fullName", text)}
+                    placeholderTextColor={theme.textSecondary}
+                  />
+                </View>
+                {errors.fullName && <Text style={styles.errorText}>{errors.fullName}</Text>}
+              </>
+            )}
 
-          {activeTab === 'signup' && (
             <View style={[styles.inputContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
-              <Icon name="local-offer" size={20} color={theme.textSecondary} style={styles.inputIcon} />
+              <Icon name="email" size={20} color={theme.textSecondary} style={styles.inputIcon} />
               <TextInput
-                style={[styles.input, { color: theme.text }]}
-                placeholder="Referral Code (Optional)"
-                value={formData.referralCode}
-                onChangeText={(text) => updateFormData('referralCode', text)}
-                autoCapitalize="characters"
+                style={[styles.input, { color: theme.text }, errors.email && styles.inputError]}
+                placeholder="johndoe@gmail.com"
+                value={formData.email}
+                onChangeText={(text) => updateFormData("email", text)}
+                keyboardType="email-address"
+                autoCapitalize="none"
                 placeholderTextColor={theme.textSecondary}
               />
             </View>
-          )}
+            {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
-          {activeTab === 'signin' && (
-            <TouchableOpacity
-              style={styles.forgotPassword}
-              onPress={() => navigation.navigate('ForgotPassword')}
-            >
-              <Text style={[styles.forgotPasswordText, { color: theme.primary }]}>Forgot Password?</Text>
+            <View style={[styles.inputContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <Icon name="lock" size={20} color={theme.textSecondary} style={styles.inputIcon} />
+              <TextInput
+                style={[styles.input, { color: theme.text }, errors.password && styles.inputError]}
+                placeholder="••••••••"
+                value={formData.password}
+                onChangeText={(text) => updateFormData("password", text)}
+                secureTextEntry={!showPassword}
+                placeholderTextColor={theme.textSecondary}
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+                <Icon name={showPassword ? "visibility" : "visibility-off"} size={20} color={theme.textSecondary} />
+              </TouchableOpacity>
+            </View>
+            {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+
+            {activeTab === "signup" && (
+              <View style={[styles.inputContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
+                <Icon name="local-offer" size={20} color={theme.textSecondary} style={styles.inputIcon} />
+                <TextInput
+                  style={[styles.input, { color: theme.text }]}
+                  placeholder="Referral Code (Optional)"
+                  value={formData.referralCode}
+                  onChangeText={(text) => updateFormData("referralCode", text)}
+                  autoCapitalize="characters"
+                  placeholderTextColor={theme.textSecondary}
+                />
+              </View>
+            )}
+
+            {activeTab === "signin" && (
+              <TouchableOpacity style={styles.forgotPassword} onPress={() => navigation.navigate("ForgotPassword")}>
+                <Text style={[styles.forgotPasswordText, { color: theme.primary }]}>Forgot Password?</Text>
+              </TouchableOpacity>
+            )}
+
+            <TouchableOpacity style={[styles.submitButton, { backgroundColor: theme.primary }]} onPress={handleSubmit}>
+              <Text style={styles.submitButtonText}>
+                {activeTab === "signin" ? "Sign In" : isLoading ? "Creating Account..." : "Sign Up"}
+              </Text>
             </TouchableOpacity>
-          )}
 
-          <TouchableOpacity style={[styles.submitButton, { backgroundColor: theme.primary }]} onPress={handleSubmit}>
-            <Text style={styles.submitButtonText}>
-              {activeTab === 'signin' ? 'Sign In' : (isLoading ? 'Creating Account...' : 'Sign Up')}
-            </Text>
-          </TouchableOpacity>
+            <View style={styles.divider}>
+              <View style={[styles.dividerLine, { backgroundColor: theme.border }]} />
+              <Text style={[styles.dividerText, { color: theme.textSecondary }]}>Or continue with</Text>
+              <View style={[styles.dividerLine, { backgroundColor: theme.border }]} />
+            </View>
 
-          <View style={styles.divider}>
-            <View style={[styles.dividerLine, { backgroundColor: theme.border }]} />
-            <Text style={[styles.dividerText, { color: theme.textSecondary }]}>Or continue with</Text>
-            <View style={[styles.dividerLine, { backgroundColor: theme.border }]} />
+            <TouchableOpacity style={[styles.googleButton, { borderColor: theme.border }]}>
+              <Text style={[styles.googleButtonText, { color: theme.text }]}>G Google</Text>
+            </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={[styles.googleButton, { borderColor: theme.border }]}>
-            <Text style={[styles.googleButtonText, { color: theme.text }]}>G Google</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Bottom Logo */}
-        <View style={styles.bottomContainer}>
-          <Text style={[styles.brandText, { color: theme.primary }]}>ScholarGen</Text>
-        </View>
+          {/* Bottom Logo */}
+          <View style={styles.bottomContainer}>
+            <Text style={[styles.brandText, { color: theme.primary }]}>ScholarGen</Text>
+          </View>
         </View>
       </ScrollView>
       <LoadingOverlay visible={isLoading} />
     </KeyboardAvoidingView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   scrollContent: {
     flexGrow: 1,
@@ -320,20 +320,20 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   tabContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#F5F5F5',
+    flexDirection: "row",
+    backgroundColor: "#F5F5F5",
     borderRadius: 8,
     padding: 4,
   },
   tab: {
     flex: 1,
     paddingVertical: 12,
-    alignItems: 'center',
+    alignItems: "center",
     borderRadius: 6,
   },
   activeTab: {
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
+    backgroundColor: "#FFFFFF",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 1,
@@ -344,36 +344,36 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#9E9E9E',
+    fontWeight: "500",
+    color: "#9E9E9E",
   },
   welcomeContainer: {
     marginBottom: 30,
   },
   welcomeText: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000000',
+    fontWeight: "bold",
+    color: "#000000",
     marginBottom: 8,
   },
   subtitleText: {
     fontSize: 16,
-    color: '#666666',
+    color: "#666666",
     lineHeight: 24,
   },
   formContainer: {
     flex: 1,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: "#E0E0E0",
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     marginBottom: 8,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   inputIcon: {
     marginRight: 12,
@@ -381,13 +381,13 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#000000',
+    color: "#000000",
   },
   inputError: {
-    borderColor: '#FF5252',
+    borderColor: "#FF5252",
   },
   errorText: {
-    color: '#FF5252',
+    color: "#FF5252",
     fontSize: 12,
     marginBottom: 8,
     marginLeft: 4,
@@ -396,61 +396,61 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   forgotPassword: {
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
     marginBottom: 24,
     marginTop: 8,
   },
   forgotPasswordText: {
-    color: '#FFC107',
+    color: "#FFC107",
     fontSize: 14,
   },
   submitButton: {
-    backgroundColor: '#FFC107',
+    backgroundColor: "#FFC107",
     borderRadius: 8,
     paddingVertical: 16,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 24,
   },
   submitButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 24,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: "#E0E0E0",
   },
   dividerText: {
     marginHorizontal: 16,
-    color: '#9E9E9E',
+    color: "#9E9E9E",
     fontSize: 14,
   },
   googleButton: {
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: "#E0E0E0",
     borderRadius: 8,
     paddingVertical: 16,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 40,
   },
   googleButtonText: {
-    color: '#000000',
+    color: "#000000",
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   bottomContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingBottom: 20,
   },
   brandText: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FF9800',
+    fontWeight: "bold",
+    color: "#FF9800",
   },
-});
+})
