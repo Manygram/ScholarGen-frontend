@@ -32,19 +32,19 @@ const HomeScreen = () => {
       id: 1,
       title: "Master UTME 2026",
       subtitle: "Your path to success starts here",
-      image: require("../../assets/splash-logo.png"), 
+      image: require("../../assets/hero/hero1.jpg"), 
     },
     {
       id: 2,
       title: "Study Smart",
       subtitle: "Access comprehensive study materials",
-      image: require("../../assets/splash-logo.png"),
+      image: require("../../assets/hero/hero2.jpg"),
     },
     {
       id: 3,
       title: "Practice Tests",
       subtitle: "Take unlimited practice exams",
-      image: require("../../assets/splash-logo.png"),
+      image: require("../../assets/hero/hero3.jpg"),
     },
   ]
 
@@ -276,3 +276,4 @@ const styles = StyleSheet.create({
 })
 
 export default HomeScreen
+
