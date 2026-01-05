@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage"
 
-const BASE_URL = "https://api.scholargens.com"
+const BASE_URL = "https://api.scholargens.com/api"
 
 /**
  * Common headers for all requests
@@ -124,3 +124,4 @@ export const apiClient = {
     }
   },
 }
+
