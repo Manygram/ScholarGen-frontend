@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Dimensions,
   StatusBar,
   TouchableOpacity,
   TextInput,
@@ -13,19 +12,21 @@ import {
   ScrollView,
 } from "react-native"
 import { MaterialIcons as Icon } from "@expo/vector-icons"
+import { useRouter } from "expo-router" // <--- NEW IMPORT
 import { useTheme } from "../context/ThemeContext"
 import { authService } from "../services/authService"
-// Ensure this file actually exists at this path, or the build will fail!
 import LoadingOverlay from "../components/LoadingOverlay"
 
-const API_BASE = "https://api.scholargens.com/api"
-const { width, height } = Dimensions.get("window")
+const API_BASE = "https://api.scholargens.com"
 
-export default function WelcomeScreen({ navigation }) {
+export default function WelcomeScreen() {
+  const router = useRouter() // <--- USE THIS HOOK
   const { theme } = useTheme()
+  
   const [activeTab, setActiveTab] = useState("signin")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -69,7 +70,6 @@ export default function WelcomeScreen({ navigation }) {
 
     setIsLoading(true)
     try {
-      // Pass the referral code to your backend
       const { status, data } = await authService.register(
         formData.fullName,
         formData.email,
@@ -79,8 +79,11 @@ export default function WelcomeScreen({ navigation }) {
 
       if (status === 200 || status === 201) {
         Alert.alert("Success", "Account created! Please verify your email.")
-        // Navigate to Verification screen with email
-        navigation.navigate("Verification", { email: formData.email })
+        // FIX: Route to VerificationScreen inside 'screens' folder
+        router.push({
+          pathname: "/screens/VerificationScreen",
+          params: { email: formData.email },
+        })
       } else {
         Alert.alert("Registration Failed", data.message || "Could not create account.")
       }
@@ -106,14 +109,10 @@ export default function WelcomeScreen({ navigation }) {
       const response = await authService.login(formData.email, formData.password)
       const { status, data } = response
 
-      console.log("Login Response Status:", status)
-      console.log("Login Response Body:", JSON.stringify(data, null, 2))
-
       if (status === 200 || status === 201) {
         const token = data.accessToken || data.token || data.user?.token || data.data?.token || data.access_token
 
         if (!token) {
-          console.error("[WelcomeScreen] Auth succeeded but no token found in response:", data)
           throw new Error("Authenticated but no secure token received.")
         }
 
@@ -121,7 +120,10 @@ export default function WelcomeScreen({ navigation }) {
         await authService.saveSession(sessionData)
 
         Alert.alert("Success", "Login successful!")
-        navigation.replace("MainTabs") // Use replace so they can't go back to login
+        
+        // FIX: Route to HomeScreen inside 'screens' folder
+        // Even though they are neighbors, you must use the full path from 'app'
+        router.replace("/screens/HomeScreen") 
       }
     } catch (error) {
       console.error("Login error:", error)
@@ -136,7 +138,13 @@ export default function WelcomeScreen({ navigation }) {
       if (errorMessage && errorMessage.toLowerCase().includes("verified")) {
         Alert.alert("Verification Required", "Your account is not verified. Please check your email for the OTP.", [
           { text: "Cancel", style: "cancel" },
-          { text: "Verify Now", onPress: () => navigation.navigate("Verification", { email: formData.email }) },
+          { 
+            text: "Verify Now", 
+            onPress: () => router.push({
+              pathname: "/screens/VerificationScreen",
+              params: { email: formData.email },
+            }) 
+          },
         ])
         return
       }
@@ -159,7 +167,6 @@ export default function WelcomeScreen({ navigation }) {
 
   const updateFormData = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }))
     }
@@ -268,7 +275,8 @@ export default function WelcomeScreen({ navigation }) {
             )}
 
             {activeTab === "signin" && (
-              <TouchableOpacity style={styles.forgotPassword} onPress={() => navigation.navigate("ForgotPassword")}>
+              // FIX: Route to ForgotPasswordScreen inside 'screens' folder
+              <TouchableOpacity style={styles.forgotPassword} onPress={() => router.push("/screens/ForgotPasswordScreen")}>
                 <Text style={[styles.forgotPasswordText, { color: theme.primary }]}>Forgot Password?</Text>
               </TouchableOpacity>
             )}
@@ -296,7 +304,6 @@ export default function WelcomeScreen({ navigation }) {
           </View>
         </View>
       </ScrollView>
-      {/* If this file doesn't exist, the build will fail here */}
       <LoadingOverlay visible={isLoading} />
     </KeyboardAvoidingView>
   )
