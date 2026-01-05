@@ -1,32 +1,33 @@
 import { useEffect } from "react"
-import { View, Text, StyleSheet, Dimensions, StatusBar, Image } from "react-native"
+import { View, Text, StyleSheet, StatusBar, Image } from "react-native"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import { useRouter } from "expo-router" // <--- IMPORT THIS
 
-const { width, height } = Dimensions.get("window")
+const SplashScreen = () => {
+  const router = useRouter() // <--- USE THIS HOOK
 
-const SplashScreen = ({ navigation }) => {
   useEffect(() => {
     const checkLogin = async () => {
       try {
-        // Minimum delay for branding
         await new Promise((resolve) => setTimeout(resolve, 2000))
-
-        // Check for session
         const token = await AsyncStorage.getItem("userToken")
+        
         if (token) {
-          navigation.replace("MainTabs")
+          // Use router.replace with the path (folder/file name)
+          router.replace("/(tabs)") // Assuming your main tabs are in a group named (tabs)
         } else {
-          // FIX: Navigating to Welcome instead of Login
-          navigation.replace("Welcome") 
+          // If your Welcome screen is at app/screens/WelcomeScreen.jsx
+          // You might need to move it or adjust this path. 
+          // For now, try pointing to the route name:
+          router.replace("/screens/WelcomeScreen") 
         }
       } catch (e) {
         console.error("Session check failed", e)
-        navigation.replace("Welcome")
+        router.replace("/screens/WelcomeScreen")
       }
     }
-
     checkLogin()
-  }, [navigation])
+  }, [])
 
   return (
     <View style={styles.container}>
@@ -51,7 +52,7 @@ const SplashScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF", 
+    backgroundColor: "#FFFFFF",
   },
   content: {
     flex: 1,
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
     color: "#000000",
     fontWeight: "bold",
     letterSpacing: 1,
-    marginBottom: 16, 
+    marginBottom: 16,
   },
   taglineText: {
     fontSize: 16,
