@@ -1,17 +1,17 @@
 import { useEffect } from "react";
-import { View, StyleSheet, StatusBar, Image } from "react-native";
-import { useRouter } from "expo-router"; // correct navigation for Expo
+import { View, StyleSheet, StatusBar, Image, Text } from "react-native";
+import { useRouter } from "expo-router"; 
 import { ThemeProvider } from "./context/ThemeContext"; 
 import { DatabaseProvider } from "./context/DatabaseContext";
 
-// 1. Create the Splash Screen Component
 const SplashContent = () => {
   const router = useRouter();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      // detailed check: make sure you have a file named 'app/welcome.jsx'
-      router.replace("/welcome"); 
+      // FIX: Ensure this matches your filename exactly (WelcomeScreen.jsx)
+      // If your file is in a folder named 'screens', change this to "/screens/WelcomeScreen"
+      router.replace("/WelcomeScreen"); 
     }, 3000);
 
     return () => clearTimeout(timer);
@@ -19,22 +19,28 @@ const SplashContent = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1E88E5" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      
+      {/* Center Content (Logo) */}
       <View style={styles.content}>
         <View style={styles.logoContainer}>
-          {/* Ensure this filename matches EXACTLY with your GitHub assets folder */}
           <Image
-            source={require("../assets/scholarx-logo-removebg-preview.png")}
+            source={require("../assets/splash-logo.png")}
             style={styles.logo}
             resizeMode="contain"
           />
         </View>
       </View>
+
+      {/* Bottom Text */}
+      <View style={styles.bottomContainer}>
+        <Text style={styles.titleText}>ScholarGen UTME 2026</Text>
+        <Text style={styles.subText}>Study anytime, anywhere.</Text>
+      </View>
     </View>
   );
 };
 
-// 2. Export the Main Entry (Wrapped in Providers)
 export default function IndexScreen() {
   return (
     <ThemeProvider>
@@ -48,7 +54,7 @@ export default function IndexScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1E88E5",
+    backgroundColor: "#FFFFFF",
   },
   content: {
     flex: 1,
@@ -57,9 +63,30 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: "center",
+    marginBottom: 40, // Push logo up slightly to make room
   },
   logo: {
     width: 250,
     height: 120,
+  },
+  bottomContainer: {
+    position: "absolute",
+    bottom: 50, // Position from bottom
+    alignItems: "center",
+    width: "100%",
+    paddingHorizontal: 20,
+  },
+  titleText: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#000000",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  subText: {
+    fontSize: 16,
+    color: "#666666",
+    fontWeight: "400",
+    textAlign: "center",
   },
 });
