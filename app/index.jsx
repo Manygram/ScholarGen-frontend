@@ -1,19 +1,14 @@
 import { useEffect } from "react";
-import { View, StyleSheet, StatusBar, Image, Text } from "react-native";
+import { View, StyleSheet, Image, Text } from "react-native";
 import { useRouter } from "expo-router"; 
-import { ThemeProvider } from "./context/ThemeContext"; 
-import { DatabaseProvider } from "./context/DatabaseContext";
 
 const SplashContent = () => {
   const router = useRouter();
 
   useEffect(() => {
-    // 3-second timer before moving to the next screen
     const timer = setTimeout(() => {
-      
-      // FIX: The path must include "/screens/" because your file is in that folder
+      // Assuming your file is in app/screens/WelcomeScreen.jsx
       router.replace("/screens/WelcomeScreen"); 
-      
     }, 3000);
 
     return () => clearTimeout(timer);
@@ -21,9 +16,6 @@ const SplashContent = () => {
 
   return (
     <View style={styles.container}>
-      {/* Dark text for the status bar because the background is white */}
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      
       {/* Center Content (Logo) */}
       <View style={styles.content}>
         <View style={styles.logoContainer}>
@@ -38,20 +30,15 @@ const SplashContent = () => {
       {/* Bottom Text */}
       <View style={styles.bottomContainer}>
         <Text style={styles.titleText}>ScholarGen UTME 2026</Text>
-        <Text style={styles.subText}>Study anytime, anywhere.</Text>
+        <Text style={styles.subText}>Learn, Excel and Achieve</Text>
       </View>
     </View>
   );
 };
 
 export default function IndexScreen() {
-  return (
-    <ThemeProvider>
-      <DatabaseProvider>
-        <SplashContent />
-      </DatabaseProvider>
-    </ThemeProvider>
-  );
+  // Providers are now in _layout.jsx, so we don't need them here!
+  return <SplashContent />;
 }
 
 const styles = StyleSheet.create({
@@ -66,7 +53,7 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: "center",
-    marginBottom: 40, // Push logo up slightly to make room
+    marginBottom: 40, 
   },
   logo: {
     width: 250,
@@ -74,7 +61,7 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     position: "absolute",
-    bottom: 50, // Position from bottom
+    bottom: 50, 
     alignItems: "center",
     width: "100%",
     paddingHorizontal: 20,
@@ -88,7 +75,7 @@ const styles = StyleSheet.create({
   },
   subText: {
     fontSize: 16,
-    color: "#666666", // Grey text
+    color: "#666666",
     fontWeight: "400",
     textAlign: "center",
   },
