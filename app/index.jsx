@@ -8,10 +8,12 @@ const SplashContent = () => {
   const router = useRouter();
 
   useEffect(() => {
+    // 3-second timer before moving to the next screen
     const timer = setTimeout(() => {
-      // FIX: Ensure this matches your filename exactly (WelcomeScreen.jsx)
-      // If your file is in a folder named 'screens', change this to "/screens/WelcomeScreen"
-      router.replace("/WelcomeScreen"); 
+      
+      // FIX: The path must include "/screens/" because your file is in that folder
+      router.replace("/screens/WelcomeScreen"); 
+      
     }, 3000);
 
     return () => clearTimeout(timer);
@@ -19,6 +21,7 @@ const SplashContent = () => {
 
   return (
     <View style={styles.container}>
+      {/* Dark text for the status bar because the background is white */}
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       
       {/* Center Content (Logo) */}
@@ -54,7 +57,7 @@ export default function IndexScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FFFFFF", // White background
   },
   content: {
     flex: 1,
@@ -85,7 +88,7 @@ const styles = StyleSheet.create({
   },
   subText: {
     fontSize: 16,
-    color: "#666666",
+    color: "#666666", // Grey text
     fontWeight: "400",
     textAlign: "center",
   },
