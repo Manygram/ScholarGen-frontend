@@ -17,7 +17,7 @@ import { useTheme } from "../context/ThemeContext"
 import { authService } from "../services/authService"
 import LoadingOverlay from "../components/LoadingOverlay"
 
-const API_BASE = "https://api.scholargens.com"
+const API_BASE = "https://api.scholargens.com/api"
 
 export default function WelcomeScreen() {
   const router = useRouter() // <--- USE THIS HOOK
