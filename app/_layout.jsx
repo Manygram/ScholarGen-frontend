@@ -8,10 +8,10 @@ export default function RootLayout() {
     <ThemeProvider>
       <DatabaseProvider>
         <StatusBar style="dark" backgroundColor="#FFFFFF" />
-        {/* The Stack navigator handles all your screens automatically */}
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-        </Stack>
+        {/* FIX: Self-closing Stack tag. 
+           This tells Expo: "Find every screen in my app automatically." 
+        */}
+        <Stack screenOptions={{ headerShown: false }} />
       </DatabaseProvider>
     </ThemeProvider>
   );
