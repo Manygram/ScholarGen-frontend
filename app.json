@@ -5,7 +5,7 @@
     "owner": "manygrame",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/splash-logo.png",
+    "icon": "./assets/UTME-DROID_112536.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash-logo.png",
@@ -32,7 +32,7 @@
       ]
     },
     "web": {
-      "favicon": "./assets/splash-logo.png"
+      "favicon": "./assets/UTME-DROID_112536.png"
     },
     "plugins": [
       "expo-font",
@@ -56,4 +56,5 @@
     }
   }
 }
+
 
